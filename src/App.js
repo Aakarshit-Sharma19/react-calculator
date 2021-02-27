@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 
 function Button(props) {
   return (
-    <div onClick={props.onClick} className='button'>
+    <div className="button center-text" onClick={() => props.onClick()} >
       {props.value}
     </div>
   );
@@ -24,20 +24,19 @@ class AppUI extends Component {
 
   renderOperandButton(i) {
     return (
-      <div className="button center-text" onClick={() => alert(i)}>
-        {i}
-      </div>
+      <Button value={i} onClick={() => this.props.assignOperation(i)} />
     );
   }
 
   renderNumberButton(i) {
     return (
-      <div className="button center-text" onClick={() => this.props.onClickNumber(i)}>
-        {i}
-      </div>
+      <Button value={i} onClick={() => this.props.onClickNumber(i)} />
     );
   }
   render() {
+    const clearButton = (
+      <Button value={'C'} onClick={() => this.props.clearScreen()} />
+    );
     return (
       <div>
         <Display value={this.props.displaynum} />
@@ -54,13 +53,16 @@ class AppUI extends Component {
             {this.renderNumberButton(1)}
             {this.renderNumberButton(0)}
             {this.renderNumberButton('00')}
-            {this.renderNumberButton('000')}
+            {clearButton}
           </div>
           <div className="operation-board">
             {this.renderOperandButton('+')}
             {this.renderOperandButton('-')}
             {this.renderOperandButton('*')}
             {this.renderOperandButton('/')}
+          </div>
+          <div>
+            <Button value={'='} onClick={() => this.props.evaluate()} />
           </div>
         </div>
       </div>
@@ -71,24 +73,95 @@ class Calculator extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      number1: 0,
-      number2: 0,
       result: 0,
       displaynum: 0,
-      operation: ''
+      operand: '',
+      num: 0,
+      displayBuffer: false,
+      awaitingEvaluation: true
     };
   }
+  clearScreen() {
+    this.setState({
+      result: 0,
+      displaynum: 0,
+      operand: '',
+      num: 0,
+      displayBuffer: false,
+    });
+  }
+
   handleClick(i) {
-    if (`${this.state.displaynum}`.length < 10)
+    if (this.state.displayBuffer) {
+      this.setState({
+        displayBuffer: false,
+        displaynum: parseInt(i),
+      })
+    }
+    else if (`${this.state.displaynum}`.length < 10)
       this.setState({
         displaynum: parseInt(this.state.displaynum + `${i}`)
       });
+
+  }
+  assignOperation(operand) {
+    this.setState({
+      operand: operand,
+      result: this.state.displaynum,
+      displayBuffer: true,
+      // num: this.state.displaynum
+    });
+    if (this.state.awaitingEvaluation) {
+      this.evaluate();
+      this.setState({
+        operand: operand,
+      });
+    }
+    else this.setState({
+      awaitingEvaluation: true
+    });
+  }
+  evaluate() {
+    let number1 = this.state.result;
+    let number2 = this.state.displaynum;
+    let operand = this.state.operand;
+    if (number1 && number2 && operand) {
+      let result = 0;
+      switch (operand) {
+        case '+':
+          result = number1 + number2;
+          break;
+        case '-':
+          result = number1 - number2;
+          break;
+        case '*':
+          result = number1 * number2;
+          break;
+        case '/':
+          result = number1 / number2;
+          break;
+      }
+      this.setState({
+        result: result,
+        displaynum: result,
+        operand: ''
+      });
+    }
+  }
+  componentDidMount() {
+
   }
   render() {
     return (
       <div>
         <div className='container'>
-          <AppUI {...this.state} onClickNumber={(i) => this.handleClick(i)} />
+          <AppUI
+            {...this.state}
+            onClickNumber={(i) => this.handleClick(i)}
+            clearScreen={() => this.clearScreen()}
+            assignOperation={(operand) => this.assignOperation(operand)}
+            evaluate={() => this.evaluate()}
+          />
         </div>
       </div>
     );
