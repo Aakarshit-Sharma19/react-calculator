@@ -16,6 +16,7 @@
   text-align: center;
 }
 .screen {
+  overflow: hidden;
   margin-bottom: 10px;
   font-size: 50px;
   height: 100px;
