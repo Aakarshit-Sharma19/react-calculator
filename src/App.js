@@ -58,8 +58,8 @@ class AppUI extends Component {
           <div className="operation-board">
             {this.renderOperandButton('+')}
             {this.renderOperandButton('-')}
-            {this.renderOperandButton('*')}
-            {this.renderOperandButton('/')}
+            {this.renderOperandButton('×')}
+            {this.renderOperandButton('÷')}
           </div>
           <div>
             <Button value={'='} onClick={() => this.props.evaluate()} />
@@ -134,10 +134,10 @@ class Calculator extends Component {
         case '-':
           result = number1 - number2;
           break;
-        case '*':
+        case '×':
           result = number1 * number2;
           break;
-        case '/':
+        case '÷':
           result = number1 / number2;
           break;
       }
